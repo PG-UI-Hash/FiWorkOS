@@ -18,5 +18,9 @@ install -Dm644 "$SOURCE/etc/plymouth/plymouthd.conf" /etc/plymouth/plymouthd.con
 
 sed -i 's/ filesystems/ plymouth filesystems/' /etc/mkinitcpio.conf
 mkinitcpio -P
+for account in $(awk -F: '$3 >= 1000 && $3 < 60000 && $6 ~ /^\/home\// { print $1 }' /etc/passwd); do
+  usermod -aG video,storage,optical "$account"
+done
+
 systemctl enable NetworkManager.service sddm.service
 systemctl set-default graphical.target
