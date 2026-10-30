@@ -1,0 +1,9 @@
+Package: prathamos-shell
+Version: 0.1.0
+Section: x11
+Priority: optional
+Architecture: amd64
+Depends: qt6-qpa-plugins, qml6-module-qtquick, qml6-module-qtquick-controls, qml6-module-qtquick-layouts, qml6-module-qtquick-window, labwc, swaybg
+Maintainer: PrathamOS Project <maintainers@example.invalid>
+Description: PrathamOS PDS desktop shell
+ Original Qt 6/QML dock and launcher for the PrathamOS desktop.
