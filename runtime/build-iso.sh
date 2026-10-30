@@ -9,44 +9,53 @@ OUTPUT_ISO="${OUTPUT_ISO:-$GITHUB_WORKSPACE/PrathamOS-0.1.0-amd64.iso}"
 DEB="$GITHUB_WORKSPACE/dist/prathamos-shell_0.1.0_amd64.deb"
 SUMS="$GITHUB_WORKSPACE/SHA256SUMS"
 
-if [[ ! -s "$DEB" ]]; then
-  echo "Missing compiled PrathamOS package: $DEB" >&2
-  exit 1
-fi
-
-if [[ ! -s "$BASE_ISO" ]]; then
-  echo "Missing Ubuntu Desktop base ISO: $BASE_ISO" >&2
-  exit 1
-fi
+test -s "$DEB" || { echo "Missing compiled PrathamOS package: $DEB" >&2; exit 1; }
+test -s "$BASE_ISO" || { echo "Missing Ubuntu Desktop base ISO: $BASE_ISO" >&2; exit 1; }
 
 if [[ -s "$SUMS" ]]; then
   grep 'ubuntu-26.04.1-desktop-amd64.iso$' "$SUMS" | sha256sum --check -
 fi
 
-# Discover the live root filesystem shipped by the official Ubuntu Desktop ISO.
+# Ubuntu 26.04 Desktop ships several locale and Secure Boot variants.
+# Modify the common minimal root filesystem, never the first locale-specific
+# squashfs returned by xorriso.
 CASPER_LIST="$(xorriso -indev "$BASE_ISO" -ls /casper 2>/dev/null)"
 printf '%s\n' "$CASPER_LIST"
-SQUASH_NAME="$(printf '%s\n' "$CASPER_LIST" | grep -oE '[[:alnum:]_.-]+\.squashfs' | sed 's/\.squashfs$//' | grep -m1 -E '^ubuntu-desktop-minimal$|^filesystem$' || true)"
+SQUASH_NAME="$(printf '%s\n' "$CASPER_LIST" | grep -oE '[[:alnum:]_.-]+\.squashfs' | sed 's/\.squashfs$//' | grep -m1 -E '^(minimal|ubuntu-desktop-minimal|filesystem)$' || true)"
 if [[ -z "$SQUASH_NAME" ]]; then
-  SQUASH_NAME="$(printf '%s\n' "$CASPER_LIST" | grep -oE '[[:alnum:]_.-]+\.squashfs' | head -n1 | sed 's/\.squashfs$//')"
-fi
-if [[ -z "$SQUASH_NAME" ]]; then
-  echo "Could not find a casper squashfs in the Ubuntu ISO." >&2
+  echo "Could not find the common Ubuntu root squashfs (minimal.squashfs, ubuntu-desktop-minimal.squashfs or filesystem.squashfs)." >&2
   exit 1
 fi
-echo "Customizing casper/$SQUASH_NAME.squashfs"
+echo "Customizing common root filesystem: casper/$SQUASH_NAME.squashfs"
 
 ACTIONS="$GITHUB_WORKSPACE/runtime/livefs-actions.yml"
 cat > "$ACTIONS" <<EOF
 - name: edit-squashfs
   squash_name: $SQUASH_NAME
+  add_sys_mounts: false
 - name: shell
   command: |
     set -eux
-    cp "\$GITHUB_WORKSPACE/dist/prathamos-shell_0.1.0_amd64.deb" "new/$SQUASH_NAME/tmp/prathamos-shell.deb"
-    chroot "new/$SQUASH_NAME" /bin/bash -euxc 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y /tmp/prathamos-shell.deb && apt-get clean && rm -rf /var/lib/apt/lists/*'
-    mkdir -p "new/$SQUASH_NAME/etc/gdm3"
-    cat > "new/$SQUASH_NAME/etc/gdm3/custom.conf" <<'GDMEOF'
+    ROOT="new/$SQUASH_NAME"
+    mkdir -p "$ROOT/tmp" "$ROOT/dev" "$ROOT/proc" "$ROOT/sys"
+    rm -f "$ROOT/etc/resolv.conf"
+    touch "$ROOT/etc/resolv.conf"
+    mount --bind /dev "$ROOT/dev"
+    mount --bind /sys "$ROOT/sys"
+    mount -t proc proc "$ROOT/proc"
+    mount --bind /etc/resolv.conf "$ROOT/etc/resolv.conf"
+    cleanup() {
+      umount -lf "$ROOT/etc/resolv.conf" || true
+      umount -lf "$ROOT/proc" || true
+      umount -lf "$ROOT/sys" || true
+      umount -lf "$ROOT/dev" || true
+      rm -f "$ROOT/etc/resolv.conf"
+    }
+    trap cleanup EXIT
+    cp "$GITHUB_WORKSPACE/dist/prathamos-shell_0.1.0_amd64.deb" "$ROOT/tmp/prathamos-shell.deb"
+    chroot "$ROOT" /bin/bash -euxc 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y /tmp/prathamos-shell.deb && apt-get clean && rm -rf /var/lib/apt/lists/*'
+    mkdir -p "$ROOT/etc/gdm3"
+    cat > "$ROOT/etc/gdm3/custom.conf" <<'GDMEOF'
     [daemon]
     DefaultSession=prathamos.desktop
     GDMEOF
