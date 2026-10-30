@@ -2,7 +2,7 @@ name: Build FiOS
 
 on:
   push:
-    branches: [arch-prathamos-lite]
+    branches: [main, arch-prathamos-lite]
   workflow_dispatch:
 
 permissions:
@@ -41,6 +41,7 @@ jobs:
               cp -a /usr/share/archiso/configs/releng/. build/profile/
               cp -a distro/archiso/airootfs/. build/profile/airootfs/
               cat distro/archiso/packages.x86_64 >> build/profile/packages.x86_64
+              sort -u -o build/profile/packages.x86_64 build/profile/packages.x86_64
               sed -i "s/^iso_name=.*/iso_name=\"fios\"/" build/profile/profiledef.sh
               sed -i "s/^iso_label=.*/iso_label=\"FIOS_$(date +%Y%m)\"/" build/profile/profiledef.sh
               sed -i "s/^iso_publisher=.*/iso_publisher=\"Pratham Tech.\"/" build/profile/profiledef.sh
