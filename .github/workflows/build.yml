@@ -1,0 +1,56 @@
+name: Build PrathamOS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-shell:
+    name: Build Qt desktop shell
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build pkg-config \
+            qt6-base-dev qt6-declarative-dev qt6-wayland \
+            qt6-qpa-plugins qml6-module-qtquick \
+            qml6-module-qtquick-controls qml6-module-qtquick-layouts \
+            qml6-module-qtquick-window qml6-module-qtqml-workerscript
+
+      - name: Configure
+        run: cmake -S shell -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Compile
+        run: cmake --build build --parallel
+
+      - name: Build Debian package
+        run: |
+          chmod +x packaging/build-deb.sh
+          ./packaging/build-deb.sh
+
+      - name: Upload shell binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: pratham-shell-linux-x86_64
+          path: build/pratham-shell
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Debian package
+        uses: actions/upload-artifact@v4
+        with:
+          name: prathamos-shell-deb-amd64
+          path: dist/prathamos-shell_0.1.0_amd64.deb
+          if-no-files-found: error
+          retention-days: 14
