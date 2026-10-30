@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<labwc_config>
+  <theme>
+    <name>Adwaita-dark</name>
+    <cornerRadius>12</cornerRadius>
+  </theme>
+  <keyboard>
+    <keybind key="W-Return">
+      <action name="Execute" command="x-terminal-emulator"/>
+    </keybind>
+    <keybind key="W-d">
+      <action name="Execute" command="pratham-shell"/>
+    </keybind>
+    <keybind key="W-q">
+      <action name="Close"/>
+    </keybind>
+  </keyboard>
+  <mouse>
+    <doubleClickTime>500</doubleClickTime>
+  </mouse>
+</labwc_config>
