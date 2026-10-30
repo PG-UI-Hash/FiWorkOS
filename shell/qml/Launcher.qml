@@ -56,7 +56,7 @@ Rectangle {
                     Layout.preferredHeight: 91
                     radius: 15
                     color: "#182B3F5D"
-                    visible: match
+                    visible: match && (modelData[0] !== "Install FiOS" || appLauncher.isLive())
                     Text { anchors.centerIn: parent; text: modelData[1]; color: "#55A5FF"; font.pixelSize: 28 }
                     Text { anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 10; text: modelData[0]; color: "#F5F7FB"; font.pixelSize: 12 }
                     MouseArea {
