@@ -53,19 +53,24 @@ cat > "$ACTIONS" <<EOF
     }
     trap cleanup EXIT
     python3 - "\$ROOT/etc/apt" <<'PY'
-    import pathlib, re, sys
+    import pathlib, sys
     apt_dir = pathlib.Path(sys.argv[1])
     for source in apt_dir.rglob("*"):
         if source.suffix not in {".list", ".sources"}:
             continue
-        content = source.read_text(errors="replace")
+        content = source.read_text(errors="replace").replace("\\r\\n", "\\n")
         if source.suffix == ".sources":
-            blocks = re.split(r"\\n\\s*\\n", content.strip())
-            blocks = [block for block in blocks if not re.search(r"(?i)file:/cdrom|cdrom:", block)]
+            blocks = [block for block in content.strip().split("\\n\\n")
+                      if "file:/cdrom" not in block.lower() and "cdrom:" not in block.lower()]
             source.write_text("\\n\\n".join(blocks) + ("\\n" if blocks else ""))
         else:
-            lines = [line for line in content.splitlines() if not re.search(r"(?i)^\\s*deb(?:-src)?\\s+cdrom:|file:/cdrom", line)]
+            lines = [line for line in content.splitlines()
+                     if "file:/cdrom" not in line.lower() and "cdrom:" not in line.lower()]
             source.write_text("\\n".join(lines) + "\\n")
+    for source in apt_dir.rglob("*"):
+        if source.is_file() and source.suffix in {".list", ".sources"}:
+            if "cdrom:" in source.read_text(errors="replace").lower() or "file:/cdrom" in source.read_text(errors="replace").lower():
+                print("WARNING: CD-ROM APT source remains:", source)
     PY
     cp "\$GITHUB_WORKSPACE/dist/prathamos-shell_0.1.0_amd64.deb" "\$ROOT/tmp/prathamos-shell.deb"
     chroot "\$ROOT" /bin/bash -euxc 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y /tmp/prathamos-shell.deb && apt-get clean && rm -rf /var/lib/apt/lists/*'
