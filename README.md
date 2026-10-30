@@ -8,7 +8,8 @@ The Phi emblem is the visual mark. The boot splash carries the line **“By Prat
 
 - Arch Linux kernel, systemd, pacman and upstream hardware support.
 - Labwc Wayland compositor.
-- Original FiOS dock, launcher and top panel.
+- Original FiOS dock, searchable launcher, top panel and native quick-settings center.
+- Quick controls for Wi-Fi, audio, brightness and Bluetooth, plus system appearance and update shortcuts.
 - Custom Phi emblem, wallpaper and Plymouth boot splash.
 - Firefox, Thunar and Foot.
 - NetworkManager, PipeWire, Bluetooth and removable storage.
@@ -36,7 +37,7 @@ The CI workflow copies the official ArchISO releng profile, overlays `distro/arc
 
 Boot the live ISO and select **Install FiOS** from the application launcher. This launches Archinstall. Review the target disk carefully before confirming installation; partitioning is destructive.
 
-The live account is temporary and is not intended for normal installed use. Create your own user account during installation.
+The installer profile adds the FiOS desktop packages and applies the FiOS shell, session, wallpaper and boot splash to the installed system. The live account is temporary and is not intended for normal installed use. Create your own user account during installation.
 
 ## Release targets
 
