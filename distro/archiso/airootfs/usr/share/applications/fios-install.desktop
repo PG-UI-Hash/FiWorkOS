@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Install FiOS
+Comment=Install FiOS to this computer
+Exec=foot -e archinstall
+Icon=system-software-install
+Terminal=false
+Type=Application
+Categories=System;
