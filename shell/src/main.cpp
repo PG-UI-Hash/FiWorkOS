@@ -1,6 +1,5 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QQuickStyle>
 #include <qqml.h>
 #include "AppLauncher.h"
 
@@ -9,7 +8,6 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName("PrathamOS Shell");
     QGuiApplication::setOrganizationName("Pratham");
-    QQuickStyle::setStyle("Basic");
 
     qmlRegisterType<AppLauncher>("Pratham", 1, 0, "AppLauncher");
 
