@@ -29,7 +29,7 @@ jobs:
             -v "$GITHUB_WORKSPACE:/work" \
             -w /work \
             archlinux:latest bash -euxo pipefail -c '
-              pacman -Syu --noconfirm --needed archiso base-devel cmake ninja qt6-base qt6-declarative qt6-wayland qt6-svg imagemagick
+              pacman -Syu --noconfirm --needed archiso base-devel cmake ninja qt6-base qt6-declarative qt6-wayland qt6-svg imagemagick librsvg
               cmake -S shell -B build-fios -G Ninja -DCMAKE_BUILD_TYPE=Release
               cmake --build build-fios --parallel
               install -Dm755 build-fios/fios-shell distro/archiso/airootfs/usr/bin/fios-shell
