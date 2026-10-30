@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build-shell:
-    name: Build Qt desktop shell
+    name: Compile PrathamOS desktop shell
     runs-on: ubuntu-24.04
     steps:
       - name: Check out source
@@ -53,4 +53,62 @@ jobs:
           name: prathamos-shell-deb-amd64
           path: dist/prathamos-shell_0.1.0_amd64.deb
           if-no-files-found: error
+          retention-days: 14
+
+  build-runtime-iso:
+    name: Build Ubuntu-based PrathamOS runtime ISO
+    needs: build-shell
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Download compiled PrathamOS package
+        uses: actions/download-artifact@v4
+        with:
+          name: prathamos-shell-deb-amd64
+          path: dist
+
+      - name: Install ISO customization tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            xorriso squashfs-tools liblz4-tool python3-venv \
+            python3-pip python3-debian gpg git
+
+      - name: Download official Ubuntu 26.04.1 Desktop base
+        run: |
+          curl -fL --retry 5 --retry-delay 3 \
+            https://releases.ubuntu.com/26.04/ubuntu-26.04.1-desktop-amd64.iso \
+            -o ubuntu-26.04.1-desktop-amd64.iso
+          curl -fL --retry 5 --retry-delay 3 \
+            https://releases.ubuntu.com/26.04/SHA256SUMS -o SHA256SUMS
+          grep 'ubuntu-26.04.1-desktop-amd64.iso$' SHA256SUMS | sha256sum --check -
+
+      - name: Install Ubuntu livefs editor
+        run: |
+          git clone --depth 1 https://github.com/ubuntu/livefs-editor.git /tmp/livefs-editor
+          python3 -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install /tmp/livefs-editor
+
+      - name: Build PrathamOS runtime ISO
+        env:
+          LIVEFS_EDIT: ${{ github.workspace }}/.venv/bin/livefs-edit
+        run: |
+          chmod +x runtime/build-iso.sh
+          sudo --preserve-env=GITHUB_WORKSPACE env LIVEFS_EDIT="$LIVEFS_EDIT" \
+            GITHUB_WORKSPACE="$GITHUB_WORKSPACE" ./runtime/build-iso.sh
+
+      - name: Upload bootable PrathamOS ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: PrathamOS-0.1.0-amd64-ISO
+          path: |
+            PrathamOS-0.1.0-amd64.iso
+            PrathamOS-0.1.0-amd64.iso.sha256
+          if-no-files-found: error
+          compression-level: 0
           retention-days: 14
