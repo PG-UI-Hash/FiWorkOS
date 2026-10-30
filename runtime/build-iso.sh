@@ -6,7 +6,7 @@ set -euo pipefail
 
 BASE_ISO="${BASE_ISO:-$GITHUB_WORKSPACE/ubuntu-26.04.1-desktop-amd64.iso}"
 OUTPUT_ISO="${OUTPUT_ISO:-$GITHUB_WORKSPACE/PrathamOS-0.1.0-amd64.iso}"
-DEB="$GITHUB_WORKSPACE/dist/prathamos-shell_0.1.0_amd64.deb"
+DEB="\$GITHUB_WORKSPACE/dist/prathamos-shell_0.1.0_amd64.deb"
 SUMS="$GITHUB_WORKSPACE/SHA256SUMS"
 
 test -s "$DEB" || { echo "Missing compiled PrathamOS package: $DEB" >&2; exit 1; }
@@ -37,25 +37,25 @@ cat > "$ACTIONS" <<EOF
   command: |
     set -eux
     ROOT="new/$SQUASH_NAME"
-    mkdir -p "$ROOT/tmp" "$ROOT/dev" "$ROOT/proc" "$ROOT/sys"
-    rm -f "$ROOT/etc/resolv.conf"
-    touch "$ROOT/etc/resolv.conf"
-    mount --bind /dev "$ROOT/dev"
-    mount --bind /sys "$ROOT/sys"
-    mount -t proc proc "$ROOT/proc"
-    mount --bind /etc/resolv.conf "$ROOT/etc/resolv.conf"
+    mkdir -p "\$ROOT/tmp" "\$ROOT/dev" "\$ROOT/proc" "\$ROOT/sys"
+    rm -f "\$ROOT/etc/resolv.conf"
+    touch "\$ROOT/etc/resolv.conf"
+    mount --bind /dev "\$ROOT/dev"
+    mount --bind /sys "\$ROOT/sys"
+    mount -t proc proc "\$ROOT/proc"
+    mount --bind /etc/resolv.conf "\$ROOT/etc/resolv.conf"
     cleanup() {
-      umount -lf "$ROOT/etc/resolv.conf" || true
-      umount -lf "$ROOT/proc" || true
-      umount -lf "$ROOT/sys" || true
-      umount -lf "$ROOT/dev" || true
-      rm -f "$ROOT/etc/resolv.conf"
+      umount -lf "\$ROOT/etc/resolv.conf" || true
+      umount -lf "\$ROOT/proc" || true
+      umount -lf "\$ROOT/sys" || true
+      umount -lf "\$ROOT/dev" || true
+      rm -f "\$ROOT/etc/resolv.conf"
     }
     trap cleanup EXIT
-    cp "$GITHUB_WORKSPACE/dist/prathamos-shell_0.1.0_amd64.deb" "$ROOT/tmp/prathamos-shell.deb"
-    chroot "$ROOT" /bin/bash -euxc 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y /tmp/prathamos-shell.deb && apt-get clean && rm -rf /var/lib/apt/lists/*'
-    mkdir -p "$ROOT/etc/gdm3"
-    cat > "$ROOT/etc/gdm3/custom.conf" <<'GDMEOF'
+    cp "\$GITHUB_WORKSPACE/dist/prathamos-shell_0.1.0_amd64.deb" "\$ROOT/tmp/prathamos-shell.deb"
+    chroot "\$ROOT" /bin/bash -euxc 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y /tmp/prathamos-shell.deb && apt-get clean && rm -rf /var/lib/apt/lists/*'
+    mkdir -p "\$ROOT/etc/gdm3"
+    cat > "\$ROOT/etc/gdm3/custom.conf" <<'GDMEOF'
     [daemon]
     DefaultSession=prathamos.desktop
     GDMEOF
