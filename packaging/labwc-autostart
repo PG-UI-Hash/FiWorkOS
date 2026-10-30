@@ -1,0 +1,4 @@
+#!/bin/sh
+# Keep startup lean. The compositor owns window management; Pratham owns the shell.
+swaybg -i /usr/share/prathamos/wallpaper.svg -m fill &
+pratham-shell &
