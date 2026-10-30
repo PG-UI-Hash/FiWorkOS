@@ -18,6 +18,7 @@ Window {
     Pds { id: pds }
     AppLauncher { id: appLauncher }
     Panel { }
+    FiOSSettings { id: settingsWindow }
 
     Rectangle {
         anchors.fill: parent
@@ -57,7 +58,7 @@ Window {
                     { label: "Terminal", glyph: ">_", command: "foot" },
                     { label: "Files", glyph: "▤", command: "thunar" },
                     { label: "Browser", glyph: "◎", command: "firefox" },
-                    { label: "Settings", glyph: "⚙", command: "nwg-look" }
+                    { label: "Settings", glyph: "⚙", command: "" }
                 ]
                 delegate: Rectangle {
                     Layout.preferredWidth: 53
@@ -75,7 +76,10 @@ Window {
                         id: mouse
                         anchors.fill: parent
                         hoverEnabled: true
-                        onClicked: appLauncher.launch(modelData.command)
+                        onClicked: {
+                            if (modelData.label === "Settings") settingsWindow.show();
+                            else appLauncher.launch(modelData.command);
+                        }
                     }
                     ToolTip.visible: mouse.containsMouse
                     ToolTip.text: modelData.label
@@ -103,5 +107,9 @@ Window {
         y: -height - 12
         visible: false
         onRequestClose: visible = false
+        onRequestSettings: {
+            visible = false
+            settingsWindow.show()
+        }
     }
 }
