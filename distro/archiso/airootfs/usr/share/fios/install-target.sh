@@ -8,6 +8,8 @@ if [[ ! -x "$SOURCE/usr/bin/fios-shell" ]]; then
 fi
 
 install -Dm755 "$SOURCE/usr/bin/fios-shell" /usr/bin/fios-shell
+install -Dm644 "$SOURCE/usr/lib/os-release" /usr/lib/os-release
+sed -i 's/VARIANT_ID=live/VARIANT_ID=desktop/; s/FiOS Live/FiOS Desktop/' /usr/lib/os-release
 install -Dm644 "$SOURCE/usr/share/fios/wallpaper.png" /usr/share/fios/wallpaper.png
 install -Dm644 "$SOURCE/etc/xdg/labwc/autostart" /etc/xdg/labwc/autostart
 install -Dm644 "$SOURCE/usr/share/wayland-sessions/fios.desktop" /usr/share/wayland-sessions/fios.desktop
