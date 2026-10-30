@@ -6,8 +6,8 @@
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
-    QGuiApplication::setApplicationName("PrathamOS Shell");
-    QGuiApplication::setOrganizationName("Pratham");
+    QGuiApplication::setApplicationName("FiOS Desktop");
+    QGuiApplication::setOrganizationName("Pratham Tech.");
 
     qmlRegisterType<AppLauncher>("Pratham", 1, 0, "AppLauncher");
 
