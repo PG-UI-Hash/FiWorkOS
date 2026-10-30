@@ -46,7 +46,7 @@ jobs:
               sed -i "s/^iso_publisher=.*/iso_publisher=\"Pratham Tech.\"/" build/profile/profiledef.sh
               sed -i "s/^iso_application=.*/iso_application=\"FiOS Live\"/" build/profile/profiledef.sh
               for cfg in build/profile/grub/grub.cfg build/profile/efiboot/loader/entries/01-archiso-linux.conf build/profile/syslinux/archiso_sys-linux.cfg; do
-                if [ -f "$cfg" ]; then sed -i "s/%KERNEL_PARAMS%/%KERNEL_PARAMS% quiet splash/g" "$cfg"; fi
+                if [ -f "$cfg" ]; then sed -i "s/Arch Linux/FiOS/g;s/%KERNEL_PARAMS%/%KERNEL_PARAMS% quiet splash/g" "$cfg"; fi
               done
               chmod +x build/profile/airootfs/root/customize_airootfs.sh
               chmod +x build/profile/airootfs/usr/local/bin/fios-install
