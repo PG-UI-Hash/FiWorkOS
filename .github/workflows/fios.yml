@@ -31,6 +31,7 @@ jobs:
               install -Dm755 build-fios/fios-shell distro/archiso/airootfs/usr/bin/fios-shell
               magick assets/fios-wallpaper.svg -resize 1920x1080 distro/archiso/airootfs/usr/share/fios/wallpaper.png
               magick assets/fios-phi.svg -resize 220x220 distro/archiso/airootfs/usr/share/plymouth/themes/fios/phi.png
+              install -Dm644 assets/fios-phi.svg distro/archiso/airootfs/usr/share/icons/hicolor/scalable/apps/fios.svg
               mkdir -p build/profile
               cp -a /usr/share/archiso/configs/releng/. build/profile/
               cp -a distro/archiso/airootfs/. build/profile/airootfs/
@@ -42,7 +43,6 @@ jobs:
               for cfg in build/profile/grub/grub.cfg build/profile/efiboot/loader/entries/01-archiso-linux.conf build/profile/syslinux/archiso_sys-linux.cfg; do
                 if [ -f "$cfg" ]; then sed -i "s/%KERNEL_PARAMS%/%KERNEL_PARAMS% quiet splash/g" "$cfg"; fi
               done
-              chmod +x build/profile/airootfs/root/customize_airootfs.sh
               chmod +x build/profile/airootfs/root/customize_airootfs.sh
               chmod +x build/profile/airootfs/usr/local/bin/fios-install
               chmod +x build/profile/airootfs/etc/xdg/labwc/autostart
