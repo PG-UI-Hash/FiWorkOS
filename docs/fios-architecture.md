@@ -5,11 +5,12 @@ FiOS is an x86-64 Linux distribution built on Arch Linux. It uses the upstream L
 ## FiOS experience
 
 - Qt 6 / QML desktop shell and Labwc Wayland compositor.
-- Original floating dock, application launcher and top panel.
+- Original floating dock, searchable application launcher, top panel and native quick-settings center.
+- Quick actions for Wi-Fi, audio, brightness and Bluetooth, plus appearance and update shortcuts.
 - Phi emblem, wallpaper and Plymouth boot splash reading “By Pratham Tech.”
 - Foot terminal, Thunar file manager and Firefox browser.
 - NetworkManager, PipeWire, Bluetooth and removable-storage integration.
-- Archinstall as the initial installation path.
+- Archinstall configuration that installs the FiOS package set and runs a post-install step to apply the FiOS shell, session, wallpaper and boot splash.
 
 ## Performance objective
 
