@@ -33,6 +33,7 @@ jobs:
               cmake -S shell -B build-fios -G Ninja -DCMAKE_BUILD_TYPE=Release
               cmake --build build-fios --parallel
               install -Dm755 build-fios/fios-shell distro/archiso/airootfs/usr/bin/fios-shell
+              mkdir -p distro/archiso/airootfs/usr/share/fios
               magick assets/fios-wallpaper.svg -resize 1920x1080 distro/archiso/airootfs/usr/share/fios/wallpaper.png
               magick assets/fios-phi.svg -resize 220x220 distro/archiso/airootfs/usr/share/plymouth/themes/fios/phi.png
               install -Dm644 assets/fios-phi.svg distro/archiso/airootfs/usr/share/icons/hicolor/scalable/apps/fios.svg
