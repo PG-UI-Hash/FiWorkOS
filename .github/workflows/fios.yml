@@ -29,7 +29,7 @@ jobs:
               cmake -S shell -B build-fios -G Ninja -DCMAKE_BUILD_TYPE=Release
               cmake --build build-fios --parallel
               install -Dm755 build-fios/fios-shell distro/archiso/airootfs/usr/bin/fios-shell
-              install -Dm644 assets/fios-wallpaper.svg distro/archiso/airootfs/usr/share/fios/wallpaper.svg
+              magick assets/fios-wallpaper.svg -resize 1920x1080 distro/archiso/airootfs/usr/share/fios/wallpaper.png
               magick assets/fios-phi.svg -resize 220x220 distro/archiso/airootfs/usr/share/plymouth/themes/fios/phi.png
               mkdir -p build/profile
               cp -a /usr/share/archiso/configs/releng/. build/profile/
@@ -48,7 +48,7 @@ jobs:
               useradd -m -G wheel,audio,video,storage,optical -s /bin/bash fios
               passwd -d fios
               chmod 0440 /etc/sudoers.d/10-fios-live
-              systemctl enable NetworkManager.service bluetooth.service sddm.service
+              systemctl enable NetworkManager.service sddm.service\n              systemctl disable NetworkManager-wait-online.service systemd-networkd-wait-online.service 2>/dev/null || true
               systemctl set-default graphical.target
               sed -i "s/ filesystems/ plymouth filesystems/" /etc/mkinitcpio.conf.d/archiso.conf
               mkdir -p /etc/plymouth
