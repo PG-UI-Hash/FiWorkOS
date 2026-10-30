@@ -42,12 +42,12 @@ Rectangle {
 
             Repeater {
                 model: [
-                    ["Terminal", ">_", "x-terminal-emulator"],
-                    ["Files", "▤", "xdg-open /home"],
-                    ["Web", "◎", "xdg-open https://www.google.com"],
-                    ["System Monitor", "◷", "gnome-system-monitor"],
-                    ["Settings", "⚙", "gnome-control-center"],
-                    ["Software", "＋", "gnome-software"]
+                    ["Terminal", ">_", "foot"],
+                    ["Files", "▤", "thunar"],
+                    ["Web Browser", "◎", "firefox"],
+                    ["System Monitor", "◷", "foot -e btop"],
+                    ["Appearance", "⚙", "nwg-look"],
+                    ["Install FiOS", "＋", "fios-install"]
                 ]
                 delegate: Rectangle {
                     property bool match: modelData[0].toLowerCase().includes(search.text.toLowerCase())
@@ -61,9 +61,7 @@ Rectangle {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            if (modelData[0] === "Files") appLauncher.openUrl("file:///home");
-                            else if (modelData[0] === "Web") appLauncher.openUrl("https://www.google.com");
-                            else appLauncher.launch(modelData[2])
+                            appLauncher.launch(modelData[2])
                             root.requestClose()
                         }
                     }
@@ -71,6 +69,6 @@ Rectangle {
             }
         }
         Item { Layout.fillHeight: true }
-        Text { text: "PRATHAMOS  •  PDS"; color: "#8FA4C2"; font.pixelSize: 10; font.letterSpacing: 2 }
+        Text { text: "FiOS  •  BY PRATHAM TECH."; color: "#8FA4C2"; font.pixelSize: 10; font.letterSpacing: 2 }
     }
 }
