@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1600" viewBox="0 0 2560 1600">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#101B30"/><stop offset="1" stop-color="#172D50"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#2864E8" stop-opacity=".55"/><stop offset="1" stop-color="#2864E8" stop-opacity="0"/></radialGradient>
+ <linearGradient id="line" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#55A5FF" stop-opacity=".0"/><stop offset=".5" stop-color="#55A5FF" stop-opacity=".55"/><stop offset="1" stop-color="#55A5FF" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="2560" height="1600" fill="url(#bg)"/>
+<circle cx="1760" cy="650" r="720" fill="url(#glow)"/>
+<g fill="none" stroke="url(#line)" stroke-width="2">
+ <path d="M900 0 C1200 400 1400 700 2560 900"/>
+ <path d="M720 0 C1050 500 1350 850 2560 1100"/>
+ <path d="M550 0 C900 650 1300 1050 2560 1300"/>
+</g>
+<g transform="translate(1190 590)" fill="none" stroke="#55A5FF" stroke-width="24" opacity=".9">
+ <circle cx="90" cy="90" r="90"/>
+ <path d="M180 90h140a90 90 0 0 1 0 180H180z" stroke-linejoin="round"/>
+ <path d="M180 90v180"/>
+</g>
+<text x="1280" y="990" fill="#F5F7FB" font-family="Inter, sans-serif" font-size="72" font-weight="600" text-anchor="middle" letter-spacing="8">PRATHAMOS</text>
+<text x="1280" y="1050" fill="#B8C3D4" font-family="Inter, sans-serif" font-size="24" text-anchor="middle" letter-spacing="7">THINK BEYOND THE DESKTOP</text>
+</svg>
