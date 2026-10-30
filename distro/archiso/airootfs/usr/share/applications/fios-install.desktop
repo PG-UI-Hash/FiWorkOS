@@ -2,7 +2,7 @@
 Name=Install FiOS
 Comment=Install FiOS to this computer
 Exec=foot -e archinstall
-Icon=system-software-install
+Icon=fios
 Terminal=false
 Type=Application
 Categories=System;
