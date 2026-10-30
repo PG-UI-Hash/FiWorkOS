@@ -42,19 +42,7 @@ jobs:
               for cfg in build/profile/grub/grub.cfg build/profile/efiboot/loader/entries/01-archiso-linux.conf build/profile/syslinux/archiso_sys-linux.cfg; do
                 if [ -f "$cfg" ]; then sed -i "s/%KERNEL_PARAMS%/%KERNEL_PARAMS% quiet splash/g" "$cfg"; fi
               done
-              cat > build/profile/airootfs/root/customize_airootfs.sh <<'"'"'CUSTOM'"'"'
-              #!/bin/bash
-              set -euo pipefail
-              useradd -m -G wheel,audio,video,storage,optical -s /bin/bash fios
-              passwd -d fios
-              chmod 0440 /etc/sudoers.d/10-fios-live
-              systemctl enable NetworkManager.service sddm.service\n              systemctl disable NetworkManager-wait-online.service systemd-networkd-wait-online.service 2>/dev/null || true
-              systemctl set-default graphical.target
-              sed -i "s/ filesystems/ plymouth filesystems/" /etc/mkinitcpio.conf.d/archiso.conf
-              mkdir -p /etc/plymouth
-              printf "[Daemon]\nTheme=fios\nShowDelay=0\n" > /etc/plymouth/plymouthd.conf
-              mkinitcpio -P
-              CUSTOM
+              chmod +x build/profile/airootfs/root/customize_airootfs.sh
               chmod +x build/profile/airootfs/root/customize_airootfs.sh
               chmod +x build/profile/airootfs/usr/local/bin/fios-install
               chmod +x build/profile/airootfs/etc/xdg/labwc/autostart
