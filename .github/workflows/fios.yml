@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: fios-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-fios-iso:
     name: Build FiOS x86_64 ISO
