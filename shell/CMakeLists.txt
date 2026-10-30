@@ -20,6 +20,7 @@ qt_add_resources(fios-shell "qml"
         qml/Launcher.qml
         qml/Panel.qml
         qml/Pds.qml
+        qml/FiOSSettings.qml
 )
 
 target_link_libraries(fios-shell PRIVATE
