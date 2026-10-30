@@ -6,6 +6,7 @@ import Pratham 1.0
 Rectangle {
     id: root
     signal requestClose()
+    signal requestSettings()
     AppLauncher { id: appLauncher }
     width: 510
     height: 430
@@ -46,7 +47,7 @@ Rectangle {
                     ["Files", "▤", "thunar"],
                     ["Web Browser", "◎", "firefox"],
                     ["System Monitor", "◷", "foot -e btop"],
-                    ["Appearance", "⚙", "nwg-look"],
+                    ["FiOS Settings", "⚙", ""],
                     ["Install FiOS", "＋", "fios-install"]
                 ]
                 delegate: Rectangle {
@@ -61,7 +62,8 @@ Rectangle {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            appLauncher.launch(modelData[2])
+                            if (modelData[0] === "FiOS Settings") root.requestSettings()
+                            else appLauncher.launch(modelData[2])
                             root.requestClose()
                         }
                     }
