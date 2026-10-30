@@ -1,0 +1,6 @@
+#!/bin/sh
+# FiOS desktop session services.
+nm-applet --indicator >/dev/null 2>&1 &
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 >/dev/null 2>&1 &
+swaybg -i /usr/share/fios/wallpaper.svg -m fill &
+fios-shell &
