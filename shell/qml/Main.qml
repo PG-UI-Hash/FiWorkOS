@@ -13,13 +13,11 @@ Window {
     visible: true
     color: "transparent"
     flags: Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
-    title: "PrathamOS Dock"
+    title: "FiOS Dock"
 
     Pds { id: pds }
     AppLauncher { id: appLauncher }
     Panel { }
-
-    function launch(command) { appLauncher.launch(command) }
 
     Rectangle {
         anchors.fill: parent
@@ -42,24 +40,24 @@ Window {
                 color: pds.blue
                 Text {
                     anchors.centerIn: parent
-                    text: "P"
+                    text: "Φ"
                     color: "white"
-                    font.pixelSize: 29
+                    font.pixelSize: 30
                     font.weight: Font.DemiBold
                 }
                 MouseArea { id: ma; anchors.fill: parent; hoverEnabled: true; onClicked: launcher.visible = !launcher.visible }
                 ToolTip.visible: ma.containsMouse
-                ToolTip.text: "Pratham Launcher"
+                ToolTip.text: "FiOS Launcher"
             }
 
             Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 35; color: "#405A7294" }
 
             Repeater {
                 model: [
-                    { label: "Terminal", glyph: ">_", command: "x-terminal-emulator" },
-                    { label: "Files", glyph: "▤", command: "xdg-open ~" },
-                    { label: "Browser", glyph: "◎", command: "xdg-open https://www.google.com" },
-                    { label: "Settings", glyph: "⚙", command: "gnome-control-center" }
+                    { label: "Terminal", glyph: ">_", command: "foot" },
+                    { label: "Files", glyph: "▤", command: "thunar" },
+                    { label: "Browser", glyph: "◎", command: "firefox" },
+                    { label: "Settings", glyph: "⚙", command: "nwg-look" }
                 ]
                 delegate: Rectangle {
                     Layout.preferredWidth: 53
@@ -77,11 +75,7 @@ Window {
                         id: mouse
                         anchors.fill: parent
                         hoverEnabled: true
-                        onClicked: {
-                            if (modelData.label === "Files") appLauncher.openUrl("file:///home");
-                            else if (modelData.label === "Browser") appLauncher.openUrl("https://www.google.com");
-                            else appLauncher.launch(modelData.command)
-                        }
+                        onClicked: appLauncher.launch(modelData.command)
                     }
                     ToolTip.visible: mouse.containsMouse
                     ToolTip.text: modelData.label
@@ -95,11 +89,10 @@ Window {
                 Layout.preferredHeight: 46
                 radius: 14
                 color: "#222864E8"
-                Text { anchors.centerIn: parent; text: "⌘"; color: pds.electric; font.pixelSize: 23 }
-                MouseArea { anchors.fill: parent; onClicked: launcher.visible = !launcher.visible }
+                Text { anchors.centerIn: parent; text: "Φ"; color: pds.electric; font.pixelSize: 25 }
+                MouseArea { id: shortcutMouse; anchors.fill: parent; hoverEnabled: true; onClicked: launcher.visible = !launcher.visible }
                 ToolTip.visible: shortcutMouse.containsMouse
                 ToolTip.text: "Applications"
-                MouseArea { id: shortcutMouse; anchors.fill: parent; hoverEnabled: true; onClicked: launcher.visible = !launcher.visible }
             }
         }
     }
