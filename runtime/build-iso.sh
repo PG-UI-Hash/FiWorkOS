@@ -6,7 +6,7 @@ set -euo pipefail
 
 BASE_ISO="${BASE_ISO:-$GITHUB_WORKSPACE/ubuntu-26.04.1-desktop-amd64.iso}"
 OUTPUT_ISO="${OUTPUT_ISO:-$GITHUB_WORKSPACE/PrathamOS-0.1.0-amd64.iso}"
-DEB="\$GITHUB_WORKSPACE/dist/prathamos-shell_0.1.0_amd64.deb"
+DEB="$GITHUB_WORKSPACE/dist/prathamos-shell_0.1.0_amd64.deb"
 SUMS="$GITHUB_WORKSPACE/SHA256SUMS"
 
 test -s "$DEB" || { echo "Missing compiled PrathamOS package: $DEB" >&2; exit 1; }
