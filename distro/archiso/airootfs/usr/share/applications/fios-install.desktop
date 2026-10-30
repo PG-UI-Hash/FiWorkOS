@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Install FiOS
 Comment=Install FiOS to this computer
-Exec=foot -e archinstall
+Exec=fios-install
 Icon=fios
 Terminal=false
 Type=Application
