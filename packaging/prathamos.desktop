@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=PrathamOS
+Comment=Pratham Design System desktop
+Exec=labwc -C /etc/xdg/labwc
+Type=Application
+DesktopNames=PrathamOS
