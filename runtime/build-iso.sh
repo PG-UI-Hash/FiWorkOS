@@ -44,7 +44,41 @@ cat > "$ACTIONS" <<EOF
     mount --bind /sys "\$ROOT/sys"
     mount -t proc proc "\$ROOT/proc"
     mount --bind /etc/resolv.conf "\$ROOT/etc/resolv.conf"
+    APT_BACKUP="\$ROOT/tmp/prathamos-apt-backup"
+    mkdir -p "\$APT_BACKUP"
+    if [ -f "\$ROOT/etc/apt/sources.list" ]; then
+      mv "\$ROOT/etc/apt/sources.list" "\$APT_BACKUP/sources.list"
+    fi
+    if [ -d "\$ROOT/etc/apt/sources.list.d" ]; then
+      mv "\$ROOT/etc/apt/sources.list.d" "\$APT_BACKUP/sources.list.d"
+    fi
+    mkdir -p "\$ROOT/etc/apt/sources.list.d"
+    cat > "\$ROOT/etc/apt/sources.list.d/prathamos-build.sources" <<'APT'
+    Types: deb
+    URIs: http://archive.ubuntu.com/ubuntu
+    Suites: resolute resolute-updates resolute-backports
+    Components: main restricted universe multiverse
+    Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+    Types: deb
+    URIs: http://security.ubuntu.com/ubuntu
+    Suites: resolute-security
+    Components: main restricted universe multiverse
+    Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+    APT
+    restore_apt_sources() {
+      rm -f "\$ROOT/etc/apt/sources.list.d/prathamos-build.sources"
+      rmdir "\$ROOT/etc/apt/sources.list.d" 2>/dev/null || true
+      if [ -d "\$APT_BACKUP/sources.list.d" ]; then
+        mv "\$APT_BACKUP/sources.list.d" "\$ROOT/etc/apt/sources.list.d"
+      fi
+      if [ -f "\$APT_BACKUP/sources.list" ]; then
+        mv "\$APT_BACKUP/sources.list" "\$ROOT/etc/apt/sources.list"
+      fi
+      rm -rf "\$APT_BACKUP"
+    }
     cleanup() {
+      restore_apt_sources
       umount -lf "\$ROOT/etc/resolv.conf" || true
       umount -lf "\$ROOT/proc" || true
       umount -lf "\$ROOT/sys" || true
@@ -52,26 +86,6 @@ cat > "$ACTIONS" <<EOF
       rm -f "\$ROOT/etc/resolv.conf"
     }
     trap cleanup EXIT
-    python3 - "\$ROOT/etc/apt" <<'PY'
-    import pathlib, sys
-    apt_dir = pathlib.Path(sys.argv[1])
-    for source in apt_dir.rglob("*"):
-        if source.suffix not in {".list", ".sources"}:
-            continue
-        content = source.read_text(errors="replace").replace("\\r\\n", "\\n")
-        if source.suffix == ".sources":
-            blocks = [block for block in content.strip().split("\\n\\n")
-                      if "file:/cdrom" not in block.lower() and "cdrom:" not in block.lower()]
-            source.write_text("\\n\\n".join(blocks) + ("\\n" if blocks else ""))
-        else:
-            lines = [line for line in content.splitlines()
-                     if "file:/cdrom" not in line.lower() and "cdrom:" not in line.lower()]
-            source.write_text("\\n".join(lines) + "\\n")
-    for source in apt_dir.rglob("*"):
-        if source.is_file() and source.suffix in {".list", ".sources"}:
-            if "cdrom:" in source.read_text(errors="replace").lower() or "file:/cdrom" in source.read_text(errors="replace").lower():
-                print("WARNING: CD-ROM APT source remains:", source)
-    PY
     cp "\$GITHUB_WORKSPACE/dist/prathamos-shell_0.1.0_amd64.deb" "\$ROOT/tmp/prathamos-shell.deb"
     chroot "\$ROOT" /bin/bash -euxc 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y /tmp/prathamos-shell.deb && apt-get clean && rm -rf /var/lib/apt/lists/*'
     mkdir -p "\$ROOT/etc/gdm3"
