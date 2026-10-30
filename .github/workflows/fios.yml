@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: fios-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-fios-iso:
     name: Build FiOS x86_64 ISO
@@ -25,49 +29,36 @@ jobs:
             -v "$GITHUB_WORKSPACE:/work" \
             -w /work \
             archlinux:latest bash -euxo pipefail -c '
-              pacman -Syu --noconfirm --needed archiso base-devel cmake ninja qt6-base qt6-declarative qt6-wayland qt6-svg
+              pacman -Syu --noconfirm --needed archiso base-devel cmake ninja qt6-base qt6-declarative qt6-wayland qt6-svg imagemagick librsvg
               cmake -S shell -B build-fios -G Ninja -DCMAKE_BUILD_TYPE=Release
               cmake --build build-fios --parallel
-              install -Dm755 build-fios/pratham-shell distro/archiso/airootfs/usr/bin/fios-shell
-              install -Dm644 assets/fios-wallpaper.svg distro/archiso/airootfs/usr/share/fios/wallpaper.svg
-              install -Dm644 assets/fios-phi.svg /tmp/fios-phi.svg
-              pacman -S --noconfirm --needed imagemagick
-              magick /tmp/fios-phi.svg -resize 220x220 distro/archiso/airootfs/usr/share/plymouth/themes/fios/phi.png
-              install -Dm755 distro/archiso/airootfs/usr/local/bin/fios-install distro/archiso/airootfs/usr/local/bin/fios-install
-              install -Dm755 distro/archiso/airootfs/etc/xdg/labwc/autostart /tmp/fios-autostart
-              mkdir -p /work/build/profile
-              cp -a /usr/share/archiso/configs/releng/. /work/build/profile/
-              cp -a /work/distro/archiso/airootfs/. /work/build/profile/airootfs/
-              cp /work/distro/archiso/packages.x86_64 /work/build/profile/packages.x86_64
-              sed -i "s/^iso_name=.*/iso_name=\"fios\"/" /work/build/profile/profiledef.sh
-              sed -i "s/^iso_label=.*/iso_label=\"FIOS_$(date +%Y%m)\"/" /work/build/profile/profiledef.sh
-              sed -i "s/^iso_publisher=.*/iso_publisher=\"Pratham Tech.\"/" /work/build/profile/profiledef.sh
-              sed -i "s/^iso_application=.*/iso_application=\"FiOS Live\"/" /work/build/profile/profiledef.sh
-              mkdir -p /work/build/profile/airootfs/etc/systemd/system/multi-user.target.wants
-              arch-chroot /work/build/profile/airootfs true 2>/dev/null || true
-              cat > /tmp/customize_airootfs.sh <<'"'"'CUSTOM'
-              #!/bin/bash
-              set -e
-              useradd -m -G wheel,audio,video,storage,optical -s /bin/bash fios || true
-              passwd -d fios
-              chmod 0440 /etc/sudoers.d/10-fios-live
-              systemctl enable NetworkManager.service bluetooth.service sddm.service
-              systemctl set-default graphical.target
-              if grep -q "HOOKS=" /etc/mkinitcpio.conf; then
-                sed -i "s/ filesystems/ plymouth filesystems/" /etc/mkinitcpio.conf
-              fi
-              plymouth-set-default-theme -R fios || true
-              CUSTOM
-              install -Dm755 /tmp/customize_airootfs.sh /work/build/profile/airootfs/root/customize_airootfs.sh
-              chmod +x /work/build/profile/airootfs/usr/local/bin/fios-install
-              chmod +x /work/build/profile/airootfs/etc/xdg/labwc/autostart
-              mkarchiso -v -w /work/build/work -o /work/out /work/build/profile
+              install -Dm755 build-fios/fios-shell distro/archiso/airootfs/usr/bin/fios-shell
+              mkdir -p distro/archiso/airootfs/usr/share/fios
+              magick assets/fios-wallpaper.svg -resize 1920x1080 distro/archiso/airootfs/usr/share/fios/wallpaper.png
+              magick assets/fios-phi.svg -resize 220x220 distro/archiso/airootfs/usr/share/plymouth/themes/fios/phi.png
+              install -Dm644 assets/fios-phi.svg distro/archiso/airootfs/usr/share/icons/hicolor/scalable/apps/fios.svg
+              mkdir -p build/profile
+              cp -a /usr/share/archiso/configs/releng/. build/profile/
+              cp -a distro/archiso/airootfs/. build/profile/airootfs/
+              cat distro/archiso/packages.x86_64 >> build/profile/packages.x86_64
+              sed -i "s/^iso_name=.*/iso_name=\"fios\"/" build/profile/profiledef.sh
+              sed -i "s/^iso_label=.*/iso_label=\"FIOS_$(date +%Y%m)\"/" build/profile/profiledef.sh
+              sed -i "s/^iso_publisher=.*/iso_publisher=\"Pratham Tech.\"/" build/profile/profiledef.sh
+              sed -i "s/^iso_application=.*/iso_application=\"FiOS Live\"/" build/profile/profiledef.sh
+              for cfg in build/profile/grub/grub.cfg build/profile/efiboot/loader/entries/01-archiso-linux.conf build/profile/syslinux/archiso_sys-linux.cfg; do
+                if [ -f "$cfg" ]; then sed -i "s/Arch Linux/FiOS/g;s/%KERNEL_PARAMS%/%KERNEL_PARAMS% quiet splash/g" "$cfg"; fi
+              done
+              chmod +x build/profile/airootfs/root/customize_airootfs.sh
+              chmod +x build/profile/airootfs/usr/local/bin/fios-install
+              chmod +x build/profile/airootfs/etc/xdg/labwc/autostart
+              mkarchiso -v -w build/work -o /work/out build/profile
               ISO=$(find /work/out -maxdepth 1 -type f -name "*.iso" -print -quit)
               test -n "$ISO"
               mv "$ISO" /work/out/FiOS-0.1.0-x86_64.iso
               sha256sum /work/out/FiOS-0.1.0-x86_64.iso > /work/out/FiOS-0.1.0-x86_64.iso.sha256
               SIZE=$(stat -c%s /work/out/FiOS-0.1.0-x86_64.iso)
               echo "FiOS ISO bytes: $SIZE"
+              xorriso -indev /work/out/FiOS-0.1.0-x86_64.iso -report_el_torito as_mkisofs
               if [ "$SIZE" -gt 2147483648 ]; then
                 echo "FiOS ISO exceeds the 2 GiB target." >&2
                 exit 1

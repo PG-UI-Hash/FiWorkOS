@@ -4,12 +4,18 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QStringList>
+#include <QFile>
 
 class AppLauncher : public QObject
 {
     Q_OBJECT
 public:
     using QObject::QObject;
+
+    Q_INVOKABLE bool isLive() const
+    {
+        return QFile::exists(QStringLiteral("/etc/fios-live"));
+    }
 
     Q_INVOKABLE bool launch(const QString &command)
     {

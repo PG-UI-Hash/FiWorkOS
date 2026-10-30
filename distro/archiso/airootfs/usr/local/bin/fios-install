@@ -1,2 +1,2 @@
 #!/bin/sh
-exec foot -e archinstall
+exec foot -e archinstall --config /usr/share/fios/archinstall.json

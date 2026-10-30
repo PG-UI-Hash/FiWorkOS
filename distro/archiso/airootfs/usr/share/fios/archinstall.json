@@ -1,0 +1,60 @@
+{
+  "packages": [
+    "networkmanager",
+    "network-manager-applet",
+    "iwd",
+    "wpa_supplicant",
+    "qt6-base",
+    "qt6-declarative",
+    "qt6-wayland",
+    "qt6-svg",
+    "labwc",
+    "swaybg",
+    "xorg-server",
+    "xorg-xwayland",
+    "foot",
+    "thunar",
+    "firefox",
+    "pipewire",
+    "pipewire-alsa",
+    "pipewire-pulse",
+    "wireplumber",
+    "bluez",
+    "bluez-utils",
+    "mesa",
+    "vulkan-intel",
+    "vulkan-radeon",
+    "xdg-utils",
+    "xdg-user-dirs",
+    "polkit",
+    "polkit-gnome",
+    "sddm",
+    "plymouth",
+    "ttf-inter",
+    "ttf-jetbrains-mono",
+    "noto-fonts",
+    "noto-fonts-emoji",
+    "papirus-icon-theme",
+    "grim",
+    "slurp",
+    "wl-clipboard",
+    "brightnessctl",
+    "playerctl",
+    "udisks2",
+    "gvfs",
+    "file-roller",
+    "zram-generator",
+    "btop",
+    "nwg-look"
+  ],
+  "services": [
+    "NetworkManager",
+    "sddm"
+  ],
+  "network_config": {
+    "type": "nm"
+  },
+  "custom_commands": [
+    "bash /run/archiso/sfs/airootfs/usr/share/fios/install-target.sh"
+  ]
+}
