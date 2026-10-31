@@ -1,71 +1,22 @@
-name: Build PrathamOS
+name: Build FiOS
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  build-shell:
-    name: Compile PrathamOS desktop shell
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Check out source
-        uses: actions/checkout@v4
-
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            build-essential cmake ninja-build pkg-config \
-            qt6-base-dev qt6-declarative-dev qt6-wayland \
-            qt6-qpa-plugins qml6-module-qtquick \
-            qml6-module-qtquick-controls qml6-module-qtquick-layouts \
-            qml6-module-qtquick-window qml6-module-qtqml-workerscript
-
-      - name: Configure
-        run: cmake -S shell -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-
-      - name: Compile
-        run: cmake --build build --parallel
-
-      - name: Build Debian package
-        run: |
-          chmod +x packaging/build-deb.sh
-          ./packaging/build-deb.sh
-
-      - name: Upload shell binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: pratham-shell-linux-x86_64
-          path: build/pratham-shell
-          if-no-files-found: error
-          retention-days: 14
-
-      - name: Upload Debian package
-        uses: actions/upload-artifact@v4
-        with:
-          name: prathamos-shell-deb-amd64
-          path: dist/prathamos-shell_0.1.0_amd64.deb
-          if-no-files-found: error
-          retention-days: 14
-
   build-runtime-iso:
-    name: Build Ubuntu-based PrathamOS runtime ISO
-    needs: build-shell
+    name: Build Ubuntu + KDE Plasma FiOS ISO
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
-      - name: Check out source
+      - name: Check out FiOS
         uses: actions/checkout@v4
-
-      - name: Download compiled PrathamOS package
-        uses: actions/download-artifact@v4
-        with:
-          name: prathamos-shell-deb-amd64
-          path: dist
 
       - name: Install ISO customization tools
         run: |
@@ -90,7 +41,7 @@ jobs:
           .venv/bin/pip install --upgrade pip
           .venv/bin/pip install /tmp/livefs-editor
 
-      - name: Build PrathamOS runtime ISO
+      - name: Build FiOS with KDE Plasma
         env:
           LIVEFS_EDIT: ${{ github.workspace }}/.venv/bin/livefs-edit
         run: |
@@ -98,13 +49,23 @@ jobs:
           sudo --preserve-env=GITHUB_WORKSPACE env LIVEFS_EDIT="$LIVEFS_EDIT" \
             GITHUB_WORKSPACE="$GITHUB_WORKSPACE" ./runtime/build-iso.sh
 
-      - name: Upload bootable PrathamOS ISO
+      - name: Validate ISO and report size
+        run: |
+          test -s FiOS-0.1.0-amd64.iso
+          xorriso -indev FiOS-0.1.0-amd64.iso -report_el_torito as_mkisofs >/dev/null
+          size=$(stat -c%s FiOS-0.1.0-amd64.iso)
+          echo "FiOS ISO size: $size bytes"
+          if [ "$size" -gt 2147483648 ]; then
+            echo "::warning::FiOS ISO exceeds the 2 GiB target."
+          fi
+
+      - name: Upload bootable FiOS ISO
         uses: actions/upload-artifact@v4
         with:
-          name: PrathamOS-0.1.0-amd64-ISO
+          name: FiOS-0.1.0-amd64-ISO
           path: |
-            PrathamOS-0.1.0-amd64.iso
-            PrathamOS-0.1.0-amd64.iso.sha256
+            FiOS-0.1.0-amd64.iso
+            FiOS-0.1.0-amd64.iso.sha256
           if-no-files-found: error
           compression-level: 0
           retention-days: 14
