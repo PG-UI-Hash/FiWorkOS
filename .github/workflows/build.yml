@@ -37,7 +37,7 @@ jobs:
           set -Eeuo pipefail
           test -s out/FiOS-0.1.0-x86_64.iso
           test -s out/FiOS-0.1.0-x86_64.iso.sha256
-          sha256sum --check out/FiOS-0.1.0-x86_64.iso.sha256
+          (cd out && sha256sum --check FiOS-0.1.0-x86_64.iso.sha256)
 
       - name: Upload FiOS ISO
         uses: actions/upload-artifact@v4
