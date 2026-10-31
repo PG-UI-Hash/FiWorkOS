@@ -60,7 +60,7 @@ if [[ -z "$ISO" ]]; then
   exit 1
 fi
 mv "$ISO" /work/out/FiOS-0.1.0-x86_64.iso
-sha256sum /work/out/FiOS-0.1.0-x86_64.iso > /work/out/FiOS-0.1.0-x86_64.iso.sha256
+(cd /work/out && sha256sum FiOS-0.1.0-x86_64.iso > FiOS-0.1.0-x86_64.iso.sha256)
 SIZE=$(stat -c%s /work/out/FiOS-0.1.0-x86_64.iso)
 echo "FiOS ISO bytes: $SIZE"
 xorriso -indev /work/out/FiOS-0.1.0-x86_64.iso -report_el_torito as_mkisofs
