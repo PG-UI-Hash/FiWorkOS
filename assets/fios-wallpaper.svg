@@ -1,14 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
-<defs>
- <radialGradient id="bg"><stop stop-color="#203D70"/><stop offset="1" stop-color="#080F1D"/></radialGradient>
- <linearGradient id="line"><stop stop-color="#2864E8" stop-opacity="0"/><stop offset=".5" stop-color="#55A5FF" stop-opacity=".65"/><stop offset="1" stop-color="#2864E8" stop-opacity="0"/></linearGradient>
-</defs>
+<defs><radialGradient id="bg"><stop stop-color="#203D70"/><stop offset="1" stop-color="#080F1D"/></radialGradient><linearGradient id="line"><stop stop-color="#2864E8" stop-opacity="0"/><stop offset=".5" stop-color="#55A5FF" stop-opacity=".65"/><stop offset="1" stop-color="#2864E8" stop-opacity="0"/></linearGradient></defs>
 <rect width="1920" height="1080" fill="url(#bg)"/>
-<g fill="none" stroke="url(#line)" stroke-width="2">
- <circle cx="960" cy="500" r="210"/><circle cx="960" cy="500" r="285"/><circle cx="960" cy="500" r="360"/>
- <path d="M0 800 Q480 420 960 800 T1920 800"/><path d="M0 870 Q480 490 960 870 T1920 870"/>
-</g>
-<g transform="translate(960 470)" fill="none" stroke="#55A5FF" stroke-width="18">
- <circle r="92"/><path d="M0 -145V145" stroke="#F5F7FB" stroke-width="14" stroke-linecap="round"/>
-</g>
+<g fill="none" stroke="url(#line)" stroke-width="2"><circle cx="960" cy="500" r="210"/><circle cx="960" cy="500" r="285"/><circle cx="960" cy="500" r="360"/><path d="M0 800 Q480 420 960 800 T1920 800"/><path d="M0 870 Q480 490 960 870 T1920 870"/></g>
+<g transform="translate(960 470)" fill="none"><circle r="92" stroke="#55A5FF" stroke-width="18"/><path d="M-65 65L65 -65" stroke="#F5F7FB" stroke-width="16" stroke-linecap="round"/></g>
 </svg>
