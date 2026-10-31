@@ -2,7 +2,8 @@
 set -euo pipefail
 
 useradd -m -G wheel,audio,video,storage,optical -s /bin/bash fios
-printf 'fios:fios\n' | chpasswd
+# The live desktop logs in automatically. No shared password is shipped.
+passwd -d fios
 touch /etc/fios-live
 chmod 0440 /etc/sudoers.d/10-fios-live
 
