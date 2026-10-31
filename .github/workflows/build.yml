@@ -8,64 +8,72 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: fios-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-runtime-iso:
-    name: Build Ubuntu + KDE Plasma FiOS ISO
-    if: github.event_name != 'pull_request'
+  build-fios-iso:
+    name: Build FiOS Arch Linux + KDE Plasma ISO
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
       - name: Check out FiOS
         uses: actions/checkout@v4
 
-      - name: Install ISO customization tools
+      - name: Build with official ArchISO tooling
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            xorriso squashfs-tools liblz4-tool python3-venv \
-            python3-pip python3-debian gpg git
+          set -euxo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          docker run --privileged --rm \
+            -v "$GITHUB_WORKSPACE:/work" \
+            -w /work \
+            archlinux:latest bash -euxo pipefail -c '
+              pacman -Syu --noconfirm --needed archiso imagemagick librsvg
+              mkdir -p build/profile
+              cp -a /usr/share/archiso/configs/releng/. build/profile/
+              cp -a distro/archiso/airootfs/. build/profile/airootfs/
+              cat distro/archiso/packages.x86_64 >> build/profile/packages.x86_64
 
-      - name: Download official Ubuntu 26.04.1 Desktop base
-        run: |
-          curl -fL --retry 5 --retry-delay 3 \
-            https://releases.ubuntu.com/26.04/ubuntu-26.04.1-desktop-amd64.iso \
-            -o ubuntu-26.04.1-desktop-amd64.iso
-          curl -fL --retry 5 --retry-delay 3 \
-            https://releases.ubuntu.com/26.04/SHA256SUMS -o SHA256SUMS
-          grep 'ubuntu-26.04.1-desktop-amd64.iso$' SHA256SUMS | sha256sum --check -
+              sed -i "s/^iso_name=.*/iso_name=\"fios\"/" build/profile/profiledef.sh
+              sed -i "s/^iso_label=.*/iso_label=\"FIOS_$(date +%Y%m)\"/" build/profile/profiledef.sh
+              sed -i "s/^iso_publisher=.*/iso_publisher=\"Pratham Tech.\"/" build/profile/profiledef.sh
+              sed -i "s/^iso_application=.*/iso_application=\"FiOS Live - Arch Linux + KDE Plasma\"/" build/profile/profiledef.sh
 
-      - name: Install Ubuntu livefs editor
-        run: |
-          git clone --depth 1 https://github.com/ubuntu/livefs-editor.git /tmp/livefs-editor
-          python3 -m venv .venv
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install /tmp/livefs-editor
+              mkdir -p build/profile/airootfs/usr/share/fios
+              magick assets/fios-wallpaper.svg -resize 1920x1080 build/profile/airootfs/usr/share/fios/wallpaper.png
+              install -Dm644 assets/fios-phi.svg build/profile/airootfs/usr/share/icons/hicolor/scalable/apps/fios.svg
+              install -Dm644 assets/fios-phi.svg build/profile/airootfs/usr/share/fios/phi.svg
+              mkdir -p build/profile/airootfs/usr/share/plymouth/themes/fios
+              magick assets/fios-phi.svg -resize 220x220 build/profile/airootfs/usr/share/plymouth/themes/fios/phi.png
+              printf "[Plymouth Theme]\\nName=FiOS\\nDescription=FiOS boot splash by Pratham Tech.\\nModuleName=script\\n\\n[script]\\nImageDir=/usr/share/plymouth/themes/fios\\nScriptFile=/usr/share/plymouth/themes/fios/fios.script\\n" > build/profile/airootfs/usr/share/plymouth/themes/fios/fios.plymouth
+              printf "logo = Image(\\\"phi.png\\\");\\nlogo.SetX(Window.GetWidth() / 2 - logo.GetWidth() / 2);\\nlogo.SetY(Window.GetHeight() / 2 - logo.GetHeight() / 2 - 24);\\nmessage = Image.Text(\\\"By Pratham Tech.\\\", 0.8, 0.8, 0.8);\\nmessage.SetX(Window.GetWidth() / 2 - message.GetWidth() / 2);\\nmessage.SetY(Window.GetHeight() / 2 + 100);\\n" > build/profile/airootfs/usr/share/plymouth/themes/fios/fios.script
 
-      - name: Build FiOS with KDE Plasma
-        env:
-          LIVEFS_EDIT: ${{ github.workspace }}/.venv/bin/livefs-edit
-        run: |
-          chmod +x runtime/build-iso.sh
-          sudo --preserve-env=GITHUB_WORKSPACE env LIVEFS_EDIT="$LIVEFS_EDIT" \
-            GITHUB_WORKSPACE="$GITHUB_WORKSPACE" ./runtime/build-iso.sh
+              chmod +x build/profile/airootfs/root/customize_airootfs.sh
+              chmod +x build/profile/airootfs/usr/local/bin/fios-install
+              chmod +x build/profile/airootfs/usr/share/fios/install-target.sh
+              mkarchiso -v -w build/work -o /work/out build/profile
 
-      - name: Validate ISO and report size
-        run: |
-          test -s FiOS-0.1.0-amd64.iso
-          xorriso -indev FiOS-0.1.0-amd64.iso -report_el_torito as_mkisofs >/dev/null
-          size=$(stat -c%s FiOS-0.1.0-amd64.iso)
-          echo "FiOS ISO size: $size bytes"
-          if [ "$size" -gt 2147483648 ]; then
-            echo "::warning::FiOS ISO exceeds the 2 GiB target."
-          fi
+              ISO=$(find /work/out -maxdepth 1 -type f -name "*.iso" -print -quit)
+              test -n "$ISO"
+              mv "$ISO" /work/out/FiOS-0.1.0-x86_64.iso
+              sha256sum /work/out/FiOS-0.1.0-x86_64.iso > /work/out/FiOS-0.1.0-x86_64.iso.sha256
+              SIZE=$(stat -c%s /work/out/FiOS-0.1.0-x86_64.iso)
+              echo "FiOS ISO bytes: $SIZE"
+              xorriso -indev /work/out/FiOS-0.1.0-x86_64.iso -report_el_torito as_mkisofs
+              if [ "$SIZE" -gt 2147483648 ]; then
+                echo "FiOS ISO exceeds the 2 GiB target." >&2
+                exit 1
+              fi
+            '
 
-      - name: Upload bootable FiOS ISO
+      - name: Upload FiOS ISO
         uses: actions/upload-artifact@v4
         with:
-          name: FiOS-0.1.0-amd64-ISO
+          name: FiOS-0.1.0-x86_64-ISO
           path: |
-            FiOS-0.1.0-amd64.iso
-            FiOS-0.1.0-amd64.iso.sha256
+            out/FiOS-0.1.0-x86_64.iso
+            out/FiOS-0.1.0-x86_64.iso.sha256
           if-no-files-found: error
           compression-level: 0
           retention-days: 14
