@@ -6,8 +6,10 @@ pacman -Syu --noconfirm --needed archiso imagemagick librsvg xorriso
 
 rm -rf build/profile build/work
 mkdir -p build/profile
-cp -a /usr/share/archiso/configs/releng/. build/profile/
+cp -a /usr/share/archiso/configs/baseline/. build/profile/
 cp -a distro/archiso/airootfs/. build/profile/airootfs/
+# FiOS is a desktop OS, not a rescue toolkit or cloud image.
+sed -i -e '/^cloud-init$/d' -e '/^hyperv$/d' -e '/^open-vm-tools$/d' -e '/^qemu-guest-agent$/d' -e '/^virtualbox-guest-utils-nox$/d' build/profile/packages.x86_64
 cat distro/archiso/packages.x86_64 >> build/profile/packages.x86_64
 sort -u -o build/profile/packages.x86_64 build/profile/packages.x86_64
 
