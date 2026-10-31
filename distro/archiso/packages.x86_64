@@ -1,6 +1,13 @@
 base
 linux
-linux-firmware
+linux-firmware-amdgpu
+linux-firmware-atheros
+linux-firmware-broadcom
+linux-firmware-intel
+linux-firmware-mediatek
+linux-firmware-nvidia
+linux-firmware-radeon
+linux-firmware-realtek
 mkinitcpio
 networkmanager
 iwd
