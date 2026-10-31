@@ -23,73 +23,21 @@ jobs:
 
       - name: Build with official ArchISO tooling
         run: |
-          set -euxo pipefail
+          set -Eeuo pipefail
           mkdir -p "$GITHUB_WORKSPACE/out"
+          test -s .github/scripts/build-archiso.sh
           docker run --privileged --rm \
             -v "$GITHUB_WORKSPACE:/work" \
             -w /work \
-            archlinux:latest bash -s <<'ARCH_BUILD'
-          set -euxo pipefail
-          pacman -Syu --noconfirm --needed archiso imagemagick librsvg
-          mkdir -p build/profile
-          cp -a /usr/share/archiso/configs/releng/. build/profile/
-          cp -a distro/archiso/airootfs/. build/profile/airootfs/
-          cat distro/archiso/packages.x86_64 >> build/profile/packages.x86_64
-          sort -u -o build/profile/packages.x86_64 build/profile/packages.x86_64
+            archlinux:latest \
+            bash /work/.github/scripts/build-archiso.sh
 
-          sed -i 's|^iso_name=.*|iso_name="fios"|' build/profile/profiledef.sh
-          sed -i "s|^iso_label=.*|iso_label=\"FIOS_$(date +%Y%m)\"|" build/profile/profiledef.sh
-          sed -i 's|^iso_publisher=.*|iso_publisher="Pratham Tech."|' build/profile/profiledef.sh
-          sed -i 's|^iso_application=.*|iso_application="FiOS Live - Arch Linux + KDE Plasma"|' build/profile/profiledef.sh
-
-          for cfg in build/profile/grub/grub.cfg build/profile/efiboot/loader/entries/01-archiso-linux.conf build/profile/syslinux/archiso_sys-linux.cfg; do
-            if [ -f "$cfg" ]; then
-              sed -i 's/Arch Linux/FiOS/g;s/%KERNEL_PARAMS%/%KERNEL_PARAMS% quiet splash/g' "$cfg"
-            fi
-          done
-
-          mkdir -p build/profile/airootfs/usr/share/fios
-          magick assets/fios-wallpaper.svg -resize 1920x1080 build/profile/airootfs/usr/share/fios/wallpaper.png
-          install -Dm644 assets/fios-phi.svg build/profile/airootfs/usr/share/icons/hicolor/scalable/apps/fios.svg
-          install -Dm644 assets/fios-phi.svg build/profile/airootfs/usr/share/fios/phi.svg
-          mkdir -p build/profile/airootfs/usr/share/plymouth/themes/fios
-          magick assets/fios-phi.svg -resize 220x220 build/profile/airootfs/usr/share/plymouth/themes/fios/phi.png
-          cat > build/profile/airootfs/usr/share/plymouth/themes/fios/fios.plymouth <<'PLYMOUTH'
-          [Plymouth Theme]
-          Name=FiOS
-          Description=FiOS boot splash by Pratham Tech.
-          ModuleName=script
-
-          [script]
-          ImageDir=/usr/share/plymouth/themes/fios
-          ScriptFile=/usr/share/plymouth/themes/fios/fios.script
-          PLYMOUTH
-          cat > build/profile/airootfs/usr/share/plymouth/themes/fios/fios.script <<'PLYMOUTH_SCRIPT'
-          logo = Image("phi.png");
-          logo.SetX(Window.GetWidth() / 2 - logo.GetWidth() / 2);
-          logo.SetY(Window.GetHeight() / 2 - logo.GetHeight() / 2 - 24);
-          message = Image.Text("By Pratham Tech.", 0.8, 0.8, 0.8);
-          message.SetX(Window.GetWidth() / 2 - message.GetWidth() / 2);
-          message.SetY(Window.GetHeight() / 2 + 100);
-          PLYMOUTH_SCRIPT
-
-          chmod +x build/profile/airootfs/root/customize_airootfs.sh
-          chmod +x build/profile/airootfs/usr/local/bin/fios-install
-          chmod +x build/profile/airootfs/usr/share/fios/install-target.sh
-          mkarchiso -v -w build/work -o /work/out build/profile
-
-          ISO=$(find /work/out -maxdepth 1 -type f -name "*.iso" -print -quit)
-          test -n "$ISO"
-          mv "$ISO" /work/out/FiOS-0.1.0-x86_64.iso
-          sha256sum /work/out/FiOS-0.1.0-x86_64.iso > /work/out/FiOS-0.1.0-x86_64.iso.sha256
-          SIZE=$(stat -c%s /work/out/FiOS-0.1.0-x86_64.iso)
-          echo "FiOS ISO bytes: $SIZE"
-          xorriso -indev /work/out/FiOS-0.1.0-x86_64.iso -report_el_torito as_mkisofs
-          if [ "$SIZE" -gt 2147483648 ]; then
-            echo "FiOS ISO exceeds the 2 GiB target." >&2
-            exit 1
-          fi
-          ARCH_BUILD
+      - name: Verify ISO artifact exists
+        run: |
+          set -Eeuo pipefail
+          test -s out/FiOS-0.1.0-x86_64.iso
+          test -s out/FiOS-0.1.0-x86_64.iso.sha256
+          sha256sum --check out/FiOS-0.1.0-x86_64.iso.sha256
 
       - name: Upload FiOS ISO
         uses: actions/upload-artifact@v4
