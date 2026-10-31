@@ -27,7 +27,7 @@ The workflow installs ArchISO tooling, copies the official Arch Linux releng pro
 ## Installation
 Boot the live ISO and select **Install FiOS** from the Plasma application launcher. This launches Archinstall with the FiOS package profile. Review the target disk carefully before confirming installation; partitioning is destructive.
 
-The installer asks you to choose storage, partitioning, bootloader, locale and account credentials. It does not silently select or erase a disk.
+The live desktop signs in automatically and does not use a shared preset password. During installation, the interactive Archinstall wizard asks you to create your installed system's user account and set its password. Choose your own username and password there; those credentials are used after the installation reboots. FiOS keeps Archinstall's interactive prompts enabled and does not preconfigure an installed user or password. It does not silently select or erase a disk.
 
 ## Release targets
 | Target | Goal | Status |
