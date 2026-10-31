@@ -1,9 +1,9 @@
-# FiOS ArchISO profile overlay
+# FiOS ArchISO profile
 
-The CI workflow copies Arch Linux's official releng profile and overlays FiOS files before running mkarchiso. The upstream profile supplies the boot infrastructure; this repository supplies the desktop, branding, live session and installer configuration.
+FiOS is built directly from Arch Linux using the official ArchISO releng profile and mkarchiso. Ubuntu and Debian package tooling are not part of the runtime or ISO build.
 
-The live desktop uses SDDM autologin for a temporary `fios` account. The **Install FiOS** entry launches Archinstall with a FiOS package profile and a post-install command that copies the FiOS shell, session, wallpaper, Phi icon and Plymouth theme into the installed system.
+The live desktop uses KDE Plasma 6 on Wayland with SDDM autologin for the temporary fios account. The custom PDE shell is paused and is not compiled or installed. FiOS branding, the Phi emblem, wallpaper and Plymouth splash remain overlaid onto the ArchISO root filesystem.
 
-The installer still asks the user to choose storage, partitioning, bootloader, locale and account credentials. It does not silently select or erase a disk.
+The Install FiOS launcher starts Archinstall with the FiOS package profile. The installer asks the user to choose storage, partitioning, bootloader, locale and account credentials. It does not silently select or erase a disk.
 
-The ISO target is **2 GB or less**. This remains a target until CI builds and measures the artifact.
+The ISO target is 2 GiB or less. CI enforces this target and fails the build if the generated image exceeds it.
