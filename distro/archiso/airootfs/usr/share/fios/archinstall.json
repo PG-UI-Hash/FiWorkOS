@@ -1,4 +1,5 @@
 {
+  "silent": false,
   "packages": [
     "networkmanager",
     "iwd",
