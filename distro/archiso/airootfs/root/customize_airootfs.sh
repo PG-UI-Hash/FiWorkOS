@@ -2,7 +2,7 @@
 set -euo pipefail
 
 useradd -m -G wheel,audio,video,storage,optical -s /bin/bash fios
-passwd -d fios
+printf 'fios:fios\n' | chpasswd
 touch /etc/fios-live
 chmod 0440 /etc/sudoers.d/10-fios-live
 
