@@ -20,7 +20,14 @@ sed -i 's|^iso_application=.*|iso_application="FiOS Live - Arch Linux + KDE Plas
 
 for cfg in build/profile/grub/grub.cfg build/profile/efiboot/loader/entries/01-archiso-linux.conf build/profile/syslinux/archiso_sys-linux.cfg; do
   if [[ -f "$cfg" ]]; then
-    sed -i 's/Arch Linux/FiOS/g;s/%KERNEL_PARAMS%/%KERNEL_PARAMS% quiet splash/g' "$cfg"
+    sed -i 's/Arch Linux/FiOS/g' "$cfg"
+    # Keep the boot console quiet and let Plymouth own the screen.
+    # These patterns cover GRUB, systemd-boot and Syslinux kernel command lines.
+    sed -i -E '/^[[:space:]]*(linux|linuxefi|options|APPEND)[[:space:]]/ {
+      s/[[:space:]]+quiet([[:space:]]|$)/ /g
+      s/[[:space:]]+splash([[:space:]]|$)/ /g
+      s/$/ quiet splash loglevel=3 rd.udev.log_level=3 systemd.show_status=false vt.global_cursor_default=0/
+    }' "$cfg"
   fi
 done
 
@@ -41,12 +48,18 @@ ImageDir=/usr/share/plymouth/themes/fios
 ScriptFile=/usr/share/plymouth/themes/fios/fios.script
 PLYMOUTH
 cat > build/profile/airootfs/usr/share/plymouth/themes/fios/fios.script <<'PLYMOUTH_SCRIPT'
-logo = Image("emblem.png");
-logo.SetX(Window.GetWidth() / 2 - logo.GetWidth() / 2);
-logo.SetY(Window.GetHeight() / 2 - logo.GetHeight() / 2 - 24);
-message = Image.Text("By Pratham Tech.", 0.8, 0.8, 0.8);
-message.SetX(Window.GetWidth() / 2 - message.GetWidth() / 2);
-message.SetY(Window.GetHeight() / 2 + 100);
+Window.SetBackgroundTopColor(0.025, 0.035, 0.055);
+Window.SetBackgroundBottomColor(0.025, 0.035, 0.055);
+
+logo_image = Image("emblem.png");
+logo_sprite = Sprite(logo_image);
+logo_sprite.SetX(Window.GetWidth() / 2 - logo_image.GetWidth() / 2);
+logo_sprite.SetY(Window.GetHeight() / 2 - logo_image.GetHeight() / 2 - 28);
+
+message_image = Image.Text("By Pratham Tech.", 0.72, 0.80, 0.91);
+message_sprite = Sprite(message_image);
+message_sprite.SetX(Window.GetWidth() / 2 - message_image.GetWidth() / 2);
+message_sprite.SetY(Window.GetHeight() / 2 + 112);
 PLYMOUTH_SCRIPT
 
 chmod +x build/profile/airootfs/root/customize_airootfs.sh
