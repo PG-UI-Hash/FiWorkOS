@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 trap 'status=$?; echo "::error::FiOS ArchISO build failed at line ${LINENO} (exit ${status})." >&2; exit "$status"' ERR
 
-pacman -Syu --noconfirm --needed archiso imagemagick librsvg xorriso
+pacman -Syu --noconfirm --needed archiso grub imagemagick librsvg xorriso
 
 rm -rf build/profile build/work
 mkdir -p build/profile
